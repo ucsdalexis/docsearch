@@ -33,10 +33,34 @@ class FileHelpers {
 class Handler implements URLHandler {
     List<File> files;
     Handler(String directory) throws IOException {
-      this.files = FileHelpers.getFiles(Paths.get(directory));
+        this.files = FileHelpers.getFiles(Paths.get(directory));
     }
     public String handleRequest(URI url) throws IOException {
-      return "Don't know how to handle that path!";
+        if (url.getPath().equals("/search")) {
+            List<String> filesToPrint = new ArrayList<>();
+            String lineToPrint = "";
+            String[] parameters = url.getQuery().split("=");
+            Integer counter = 0;
+            if (parameters[0].equals("q")) {
+                //grep "parameters[1]" directory/*.txt > temp.txt
+                for (int i = 0; i < files.size(); i++) {
+                    if (FileHelpers.readFile(files.get(i)).contains(parameters[1])){
+                        counter++;
+                        filesToPrint.add(files.get(i).toString());
+                    }
+                }
+                for (int i = 0; i < filesToPrint.size(); i++) {
+                    lineToPrint += filesToPrint.get(i);
+                    lineToPrint += "\n";
+                }
+                return String.format("There are %d files to search:\n%s", counter, lineToPrint);
+            } else {
+                return "Add a query.";
+            }
+        } else if (url.getPath().equals("/")){
+            return String.format("There are %d files to search", files.size());
+        }
+        return "Don't know how to handle that path!";
     }
 }
 
